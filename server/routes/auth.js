@@ -3,13 +3,14 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const emailNormalized = email.trim().toLowerCase();
 
 // Register
 router.post("/register", async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: emailNormalized });
     if (existingUser) return res.status(400).json({ error: "User already exists" });
 
     const salt = await bcrypt.genSalt(10);
@@ -17,7 +18,7 @@ router.post("/register", async (req, res) => {
 
     const newUser = new User({
       username,
-      email,
+      email: emailNormalized,
       password: hashedPassword,
     });
 
@@ -33,7 +34,7 @@ router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: emailNormalized });
     if (!user) return res.status(400).json({ error: "User not found" });
 
     const isMatch = await bcrypt.compare(password, user.password);

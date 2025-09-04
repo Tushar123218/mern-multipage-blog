@@ -3,6 +3,7 @@ const router = express.Router();
 const Blog = require("../models/Blog");
 const User = require("../models/User");
 
+
 // ✅ Create blog with embedded pages
 router.post("/", async (req, res) => {
   try {
