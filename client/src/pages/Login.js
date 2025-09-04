@@ -13,13 +13,16 @@ export default function Login() {
     e.preventDefault();
     setErr("");
     try {
-      const data = await API.post("/auth/login", { email, password });
+      // ✅ Updated API call with /api prefix
+      const data = await API.post("/api/auth/login", { email, password });
 
       // expected: { token, user }
       saveAuth(data.token, data.user);
       navigate("/");
     } catch (e) {
-      setErr(e.message || "Login failed");
+      // Normalize error from fetch wrapper
+      const msg = e.payload?.message || e.message || "Login failed";
+      setErr(msg);
     }
   };
 
@@ -67,7 +70,6 @@ export default function Login() {
             Login
           </button>
 
-          {/* 🌸 Register Button */}
           <Link
             to="/register"
             style={{

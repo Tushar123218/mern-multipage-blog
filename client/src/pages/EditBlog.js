@@ -13,9 +13,9 @@ export default function EditBlog() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    API.get(`/blogs/${id}`)
+    API.get(`/api/blogs/${id}`)
       .then(res => {
-        const blog = res.data?.blog || res.blog || res.data;
+        const blog = res.blog || res.data?.blog || res.data;
         if (!blog) {
           alert("Blog not found!");
           return;
@@ -55,13 +55,17 @@ export default function EditBlog() {
 
   const handleSubmit = async e => {
     e.preventDefault();
-    await API.put(`/blogs/${id}`, {
-      title,
-      description,
-      pages,
-      author: user._id || user.id, // send author for backend check
-    });
-    navigate("/");
+    try {
+      await API.put(`/api/blogs/${id}`, {
+        title,
+        description,
+        pages,
+        author: user._id, // ✅ always send _id
+      });
+      navigate(`/blog/${id}`);
+    } catch (err) {
+      alert(err.message || "Failed to update blog");
+    }
   };
 
   if (loading)

@@ -9,18 +9,19 @@ export default function BlogDetail() {
   const [pageIndex, setPageIndex] = useState(0);
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
-  const [replyTo, setReplyTo] = useState(null); // 👈 track reply target
+  const [replyTo, setReplyTo] = useState(null); 
   const [loading, setLoading] = useState(true);
   const user = getUser();
 
   useEffect(() => {
     (async () => {
       try {
-        const blogData = await API.get(`/blogs/${id}`);
+        // ✅ Add /api prefix
+        const blogData = await API.get(`/api/blogs/${id}`);
         setBlog(blogData.blog || blogData);
 
-        const commentData = await API.get(`/comments/${id}`);
-        setComments(commentData);
+        const commentData = await API.get(`/api/comments?blogId=${id}`);
+        setComments(commentData.comments || commentData);
       } catch (e) {
         console.error(e);
       } finally {
@@ -31,8 +32,8 @@ export default function BlogDetail() {
 
   const like = async () => {
     try {
-      await API.post(`/blogs/${id}/like`, { userId: user?.id || user?._id });
-      const updated = await API.get(`/blogs/${id}`);
+      await API.post(`/api/blogs/${id}/like`, { userId: user?._id });
+      const updated = await API.get(`/api/blogs/${id}`);
       setBlog(updated.blog || updated);
     } catch (e) {
       console.error(e);
@@ -42,14 +43,14 @@ export default function BlogDetail() {
   const postComment = async () => {
     if (!commentText.trim()) return;
     try {
-      await API.post("/comments", {
+      await API.post("/api/comments", {
         blogId: id,
-        userId: user?.id || user?._id,
+        userId: user?._id,
         text: commentText,
-        parent: replyTo, // 👈 support reply
+        parent: replyTo,
       });
-      const updated = await API.get(`/comments/${id}`);
-      setComments(updated);
+      const updated = await API.get(`/api/comments?blogId=${id}`);
+      setComments(updated.comments || updated);
       setCommentText("");
       setReplyTo(null);
     } catch (e) {
@@ -66,7 +67,6 @@ export default function BlogDetail() {
     }
   };
 
-  // 🔹 helper: convert flat list into nested comments
   const nestComments = (list) => {
     const map = {};
     const roots = [];

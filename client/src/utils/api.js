@@ -1,5 +1,5 @@
 const API_BASE = process.env.REACT_APP_API_URL;
-
+console.log("API_BASE:", process.env.REACT_APP_API_URL);
 async function request(endpoint, options = {}) {
   const url = `${API_BASE}${endpoint}`;
   const headers = options.headers || {};

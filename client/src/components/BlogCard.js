@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import API from "../utils/api";
 import { getUser } from "../utils/auth";
 
@@ -15,11 +15,7 @@ function CommentThread({ comments, parentId = null, depth = 0 }) {
               {new Date(c.createdAt).toLocaleDateString()}
             </div>
             <div>{c.text}</div>
-            <CommentThread
-              comments={comments}
-              parentId={c._id}
-              depth={depth + 1}
-            />
+            <CommentThread comments={comments} parentId={c._id} depth={depth + 1} />
           </div>
         ))}
     </div>
@@ -31,23 +27,21 @@ export default function BlogCard({ blog }) {
   const [likes, setLikes] = useState(blog.likes?.length || 0);
   const navigate = useNavigate();
 
-  // Robust author check for both _id and id (string compare)
   const isAuthor =
     user &&
-    (
-      user._id === blog.author?._id ||
+    (user._id === blog.author?._id ||
       user._id === blog.author?.id ||
       user.id === blog.author?._id ||
-      user.id === blog.author?.id
-    );
+      user.id === blog.author?.id);
 
   const like = async () => {
     try {
       if (!user) return alert("Login to like");
-      await API.post(`/blogs/${blog._id}/like`, { userId: user._id || user.id });
+      // ✅ Updated API endpoint
+      await API.post(`/api/blogs/${blog._id}/like`, { userId: user._id || user.id });
       setLikes((prev) => prev + 1);
     } catch (e) {
-      console.error(e);
+      console.error("Error liking blog:", e);
     }
   };
 
@@ -57,11 +51,12 @@ export default function BlogCard({ blog }) {
 
     if (window.confirm("Are you sure you want to delete this blog?")) {
       try {
-        await API.del(`/blogs/${blog._id}?userId=${user._id || user.id}`);
+        // ✅ Updated API endpoint with userId query param
+        await API.del(`/api/blogs/${blog._id}?userId=${user._id || user.id}`);
         alert("Blog deleted");
-        window.location.reload(); // Or call a refresh function if you have one
+        window.location.reload(); // Or call a refresh function
       } catch (e) {
-        console.error(e);
+        console.error("Error deleting blog:", e);
         alert("Failed to delete blog");
       }
     }
@@ -89,7 +84,6 @@ export default function BlogCard({ blog }) {
           (blog.pages?.[0]?.content?.slice(0, 120) + "...")}
       </p>
 
-      {/* Actions */}
       <div style={{ display: "flex", gap: 12, marginBottom: 10 }}>
         <button className="btn" onClick={like}>
           👍 Like ({likes})
@@ -121,7 +115,6 @@ export default function BlogCard({ blog }) {
         )}
       </div>
 
-      {/* Nested comments preview */}
       <div
         className="comments-section"
         style={{ background: "#fff8fc", padding: 8, borderRadius: 6 }}

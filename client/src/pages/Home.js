@@ -11,8 +11,9 @@ export default function Home({ searchQuery = "" }) {
   useEffect(() => {
     (async () => {
       try {
-        const response = await API.get("/blogs");
-        const blogList = response.blogs || [];
+        // ✅ Updated API call with /api prefix
+        const response = await API.get("/api/blogs");
+        const blogList = response.blogs || response.blog || [];
         setBlogs(blogList);
       } catch (e) {
         console.error("Error fetching blogs:", e);
@@ -25,7 +26,7 @@ export default function Home({ searchQuery = "" }) {
   const handleDelete = async (blogId) => {
     if (window.confirm("Are you sure you want to delete this blog?")) {
       try {
-        await API.del(`/blogs/${blogId}`);
+        await API.del(`/api/blogs/${blogId}`);
         setBlogs((prev) => prev.filter((b) => b._id !== blogId));
       } catch (e) {
         console.error("Error deleting blog:", e);

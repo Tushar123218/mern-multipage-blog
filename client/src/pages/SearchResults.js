@@ -12,11 +12,14 @@ export default function SearchResults() {
 
   useEffect(() => {
     (async () => {
+      if (!query) return setLoading(false);
       try {
-        const res = await API.get(`/blogs/search/${query}`);
-        setBlogs(res.blogs || []);
+        // ✅ Updated API endpoint with /api prefix
+        const res = await API.get(`/api/blogs/search/${query}`);
+        setBlogs(res.blogs || res.data?.blogs || []);
       } catch (e) {
-        console.error(e);
+        console.error("Error fetching search results:", e);
+        setBlogs([]);
       } finally {
         setLoading(false);
       }
@@ -26,12 +29,16 @@ export default function SearchResults() {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <div>
+    <div style={{ padding: "16px" }}>
       <h2>Search Results for "{query}"</h2>
       {blogs.length === 0 ? (
         <div>No blogs found.</div>
       ) : (
-        blogs.map((b) => <BlogCard key={b._id} blog={b} />)
+        <div className="blog-list">
+          {blogs.map((b) => (
+            <BlogCard key={b._id} blog={b} />
+          ))}
+        </div>
       )}
     </div>
   );

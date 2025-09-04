@@ -10,7 +10,7 @@ export default function BlogCreate() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState(null);
   const navigate = useNavigate();
-  const user = getUser(); // 👈 logged-in user from localStorage
+  const user = getUser(); // logged-in user from localStorage
 
   const addPage = () => setPages(p => [...p, { heading: "", content: "" }]);
 
@@ -23,22 +23,23 @@ export default function BlogCreate() {
     setErr(null);
 
     if (!title.trim()) return setErr("Title required");
-    if (!(user?._id || user?.id)) {
-      return setErr("You must be logged in to create a blog");
-    }
+    if (!(user?._id || user?.id)) return setErr("You must be logged in to create a blog");
 
     setLoading(true);
     try {
       const payload = {
         title,
         description,
-        author: user._id||user.id, // ✅ always _id
+        author: user._id || user.id, // always use _id
         pages
       };
 
-      const res = await API.post("/blogs", payload);
+      // ✅ Fixed API call: added /api prefix
+      const res = await API.post("/api/blogs", payload);
+
+      // Navigate to created blog page
       navigate(`/blog/${res.blog._id}`);
-     } catch (e) {
+    } catch (e) {
       setErr(e.message || "Failed to create");
     } finally {
       setLoading(false);

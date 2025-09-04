@@ -14,7 +14,7 @@ app.use((req, res, next) => {
 });
 
 // Routes
-const userRoutes = require("./routes/user");   // instead of authRoutes
+const userRoutes = require("./routes/user");
 const blogRoutes = require("./routes/blogRoutes");
 const pageRoutes = require("./routes/page");
 const commentRoutes = require("./routes/comment");
@@ -26,10 +26,27 @@ app.use("/api/blogs", blogRoutes);
 app.use("/api/pages", pageRoutes);
 app.use("/api/comments", commentRoutes);
 
-// MongoDB connection
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-.then(() => console.log("MongoDB Connected"))
-.catch(err => console.log(err));
+// MongoDB connection with proper handling
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 10000, // 10s timeout
+    });
+    console.log("MongoDB Connected");
+  } catch (err) {
+    console.error("MongoDB connection error:", err);
+    process.exit(1); // exit if DB connection fails
+  }
+};
+
+connectDB();
+
+// Optional: log connection events
+mongoose.connection.on("connected", () => console.log("Mongoose connected"));
+mongoose.connection.on("error", (err) => console.error("Mongoose error:", err));
+mongoose.connection.on("disconnected", () => console.log("Mongoose disconnected"));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
