@@ -3,12 +3,13 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
-const emailNormalized = email.trim().toLowerCase();
+
 
 // Register
 router.post("/register", async (req, res) => {
   try {
     const { username, email, password } = req.body;
+    const emailNormalized = email.trim().toLowerCase();
 
     const existingUser = await User.findOne({ email: emailNormalized });
     if (existingUser) return res.status(400).json({ error: "User already exists" });
@@ -33,6 +34,7 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
+    const emailNormalized = email.trim().toLowerCase();
 
     const user = await User.findOne({ email: emailNormalized });
     if (!user) return res.status(400).json({ error: "User not found" });
